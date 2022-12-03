@@ -12,16 +12,22 @@ import (
 	"time"
 )
 
+// myFatal() -- flushes and closes log
+// file prior to exiting with error status
 func myFatal() {
 	_ = xLogBuffer.Flush()
 	_ = xLogFile.Close()
 	os.Exit(1)
 }
 
+// exitError() -- AWS claims this function is needed
+// but I think AWS is mistaken
+/**************************
 func exitErrorf(msg string, args ...interface{}) {
 	xLog.Printf(msg+"\n", args...)
 	myFatal()
 }
+*************************/
 
 const AWS_REGION = "us-west-000"
 const AWS_ENDPOINT = "s3.us-west-000.backblazeb2.com"

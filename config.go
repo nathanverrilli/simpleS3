@@ -140,7 +140,8 @@ func UsageMessage() {
 
 	_, err := fmt.Fprintf(os.Stdout, "\n%s\n", sb.String())
 	if nil != err {
-		xLog.Fatalf("error writing UsageMessage to stdout because %s\n",
+		xLog.Printf("error writing UsageMessage to stdout because %s\n",
 			err.Error())
+		myFatal()
 	}
 }
