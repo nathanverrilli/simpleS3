@@ -21,7 +21,7 @@ func myFatal() {
 }
 
 // exitError() -- AWS claims this function is needed
-// but I think AWS is mistaken
+// I think AWS is mistaken
 /**************************
 func exitErrorf(msg string, args ...interface{}) {
 	xLog.Printf(msg+"\n", args...)
@@ -39,16 +39,14 @@ func main() {
 	defer misc.DeferError(xLogBuffer.Flush)
 	initFlags()
 
-	var awsConfig aws.Config
-	awsConfig.Region = aws.String(AWS_REGION)
-	awsConfig.Endpoint = aws.String(AWS_ENDPOINT)
-
 	// use the BACKBLAZE profile in the ~/.aws/credentials file which we're not using :-)
+	// although this should set the profile section in the file we are using
 	_ = os.Setenv("AWS_PROFILE", "BACKBLAZE")
 
 	// from the working directory, which is where the program runs in the ide
 	// change this as appropriate ...
 	// _ = os.Setenv("AWS_SHARED_CREDENTIALS_FILE", "./.aws/credentials")
+	// committed to GitHub as a sample, but not using it
 
 	// where I keep the real credentials relative to the project source
 	_ = os.Setenv("AWS_SHARED_CREDENTIALS_FILE", "../.aws/credentials")
@@ -56,10 +54,17 @@ func main() {
 	// might not need this, since we're specifying it in the config?
 	_ = os.Setenv("AWS_DEFAULT_REGION", AWS_REGION)
 
-	sess, err := session.NewSession(&awsConfig)
+	// creating structures on the fly is not very readable,
+	// personal preference
+	var awsCfg aws.Config
+	awsCfg.Region = aws.String(AWS_REGION)
+	awsCfg.Endpoint = aws.String(AWS_ENDPOINT)
+
+	sess, err := session.NewSession(&awsCfg)
 	if nil != err {
-		xLog.Fatalf("could not create session for region %s because %s",
+		xLog.Printf("could not create session for region %s because %s",
 			AWS_ENDPOINT, err.Error())
+		myFatal()
 	}
 
 	svc := s3.New(sess)
@@ -76,7 +81,7 @@ func main() {
 	for ix, bucket := range result.Buckets {
 		sb.WriteString(
 			fmt.Sprintf("%3d:\t%s created on %s\n",
-				(ix + 1),
+				ix+1,
 				aws.StringValue(bucket.Name),
 				aws.TimeValue(bucket.CreationDate)))
 	}
@@ -107,16 +112,18 @@ func main() {
 	}
 
 	// download (a) file
-	newFileName := "dwnld_" + *resp.Contents[0].Key
+	newFileName := "download_" + *resp.Contents[0].Key
 	downloadFile, err := os.OpenFile(newFileName,
 		os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	if nil != err {
 		xLog.Printf("Error opening download file %s because %s",
 			newFileName, err.Error())
+		myFatal()
 	}
 	defer misc.DeferError(downloadFile.Close)
 	// do not buffer this; the downloader gets
 	// chunks and may get them out of order.
+	// missing a WriteAt interface in bufio
 
 	var goi s3.GetObjectInput
 	goi.Bucket = aws.String(*result.Buckets[0].Name)
@@ -130,9 +137,9 @@ func main() {
 		myFatal()
 	}
 
-	if FlagDebug || FlagVerbose {
-		xLog.Printf("downloaded %s as %s, in %d bytes",
-			*resp.Contents[0].Key, newFileName, byteCount)
-	}
+	//if FlagDebug || FlagVerbose {
+	xLog.Printf("downloaded %s as %s, in %d bytes",
+		*resp.Contents[0].Key, newFileName, byteCount)
+	//}
 
 }
