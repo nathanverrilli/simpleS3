@@ -17,7 +17,7 @@ show what it should look like,
 
 ## Possible Enhancements
 
-_In other words, capabilities that are **not** demonstrated in this sample._
+_In other words, capabilities that are **not** demonstrated in this sample:_
 
 * Uploading objects (files)
 * Deleting objects (files)
@@ -25,6 +25,5 @@ _In other words, capabilities that are **not** demonstrated in this sample._
 * Deleting buckets
 * Copying objects (files) within a bucket
 * Copying object (files) from bucket to bucket
-* 
 
 At this time, no further work on this project is planned.
